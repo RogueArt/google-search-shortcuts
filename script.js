@@ -1,3 +1,17 @@
+ function getTopLevelLinks() {
+  return Array.from(document.querySelectorAll('a > h3'))
+}
+// Get only links that aren't the related question pair links
+ function getVisibleTopLevelLinks() {
+  const [idx, len] = getRelatedQuestionIndex()
+
+  // Remove len elements starting at idx
+  const topLevelLinks = getTopLevelLinks()
+  topLevelLinks.splice(idx, len)
+
+  return topLevelLinks
+}
+
 // <============= UTILS =============>
 // Check if focused on search bar
  function focusedOnSearchBar() {
