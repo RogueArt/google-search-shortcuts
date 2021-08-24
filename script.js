@@ -18,12 +18,33 @@
   return document.activeElement.tagName === 'INPUT'
 }
 
+ function convertKeyToIndex(key) {
+  // Convert to int, subtract one for index
+  const input = parseInt(key)
+
+  // Return 10 if it's equal to 0
+  return input === 0 ? 10 : input
+}
+
 document.addEventListener('keydown', event => {
   // Do nothing if focused on search bar
   if (focusedOnSearchBar()) return
 
   // Get what key was pressed and if shift pressed
   const { key, shiftKey } = event
+
+  // Return if key is not a number or isn't backslash
+  const keyIsNumber = !isNaN(parseInt(key))
+  const keyIsBackslash = key === '\\'
+  if (!keyIsNumber && !keyIsBackslash) return
+
+  // Case 1: Pressed shift + number
+  if (shiftKey && keyIsNumber) {
+    const relatedLinks = getRelatedQuestionLinks()
+    const index = convertKeyToIndex(key)
+    relatedLinks[index - 1].click()
+  }
+
   // Case 2: Pressed a number
   else if (keyIsNumber) {
     const visibleLinks = getVisibleTopLevelLinks()
@@ -31,4 +52,12 @@ document.addEventListener('keydown', event => {
     visibleLinks[index - 1].click()
   }
 
+  // Case 3: Pressed backslash \
+  else if (keyIsBackslash) {
+    // Get all related questions and expand them
+    const relatedQuestions = document.querySelectorAll(
+      '.related-question-pair > div > div'
+    )
+    relatedQuestions.forEach(question => question.click())
+  }
 })
