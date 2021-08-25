@@ -1,6 +1,28 @@
  function getTopLevelLinks() {
   return Array.from(document.querySelectorAll('a > h3'))
 }
+
+ function getRelatedQuestionIndex() {
+  // Get all the links on the page
+  const allLinkNodes = getTopLevelLinks()
+  const questionLinkNodes = getRelatedQuestionLinks()
+
+  // Index to splice from is where first node is equal
+  const index = allLinkNodes.findIndex(node => node === questionLinkNodes[0])
+
+  // Return index and how many elements to splice
+  return [index, questionLinkNodes.length]
+}
+
+ function getRelatedQuestionLinks() {
+  // Get all the related questions as nodes, convert to array from NodeList
+  const questionPairNodes = document.querySelectorAll('.related-question-pair')
+  const questionPairArr = Array.from(questionPairNodes)
+
+  // Return only the links
+  return questionPairArr.map(node => node.querySelector('a > h3'))
+}
+
 // Get only links that aren't the related question pair links
  function getVisibleTopLevelLinks() {
   const [idx, len] = getRelatedQuestionIndex()
