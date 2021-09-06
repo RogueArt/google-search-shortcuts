@@ -74,19 +74,20 @@ document.addEventListener('keydown', event => {
     relatedLinks[index - 1].click()
   }
 
-  // Case 2: Pressed a number
-  else if (keyIsNumber) {
-    const visibleLinks = getVisibleTopLevelLinks()
-    const index = convertKeyToIndex(key)
-    visibleLinks[index - 1].click()
-  }
+// Sets the link back to white
+function resetFocus(link) {
+  const textNode = link.getElementsByTagName('h3')[0]
+  textNode.style.fontWeight = ''
+  textNode.style.textDecoration = ''
+}
 
-  // Case 3: Pressed backslash \
-  else if (keyIsBackslash) {
-    // Get all related questions and expand them
-    const relatedQuestions = document.querySelectorAll(
-      '.related-question-pair > div > div'
-    )
-    relatedQuestions.forEach(question => question.click())
-  }
-})
+// Sets the link back to red
+function setFocus(link, goingDown) {
+  const { top } = link.getBoundingClientRect()
+  console.log('top :>> ', top)
+  window.scrollTo(0, top + window.scrollY + (goingDown ? 50 : -50))
+
+  const textNode = link.getElementsByTagName('h3')[0]
+  textNode.style.fontWeight = 'bold'
+  textNode.style.textDecoration = 'underline'
+}
