@@ -2,37 +2,44 @@
   return Array.from(document.querySelectorAll('a > h3'))
 }
 
- function getRelatedQuestionIndex() {
-  // Get all the links on the page
-  const allLinkNodes = getTopLevelLinks()
-  const questionLinkNodes = getRelatedQuestionLinks()
+document.addEventListener('keydown', async event => {
+  const { key } = event
 
-  // Index to splice from is where first node is equal
-  const index = allLinkNodes.findIndex(node => node === questionLinkNodes[0])
+  // Don't do anything if on search bar
+  if (focusedOnSearchBar()) return
 
-  // Return index and how many elements to splice
-  return [index, questionLinkNodes.length]
-}
+  // Make sure we can access all 10 questions
+  if (links.length < 10) {
+    links = filterRelatedQuestionLinks(getAllTopLevelLinks())
+  }
 
- function getRelatedQuestionLinks() {
-  // Get all the related questions as nodes, convert to array from NodeList
-  const questionPairNodes = document.querySelectorAll('.related-question-pair')
-  const questionPairArr = Array.from(questionPairNodes)
+  // Go to link above
+  if (key === 'j') {
+    if (index === 0) return
 
-  // Return only the links
-  return questionPairArr.map(node => node.querySelector('a > h3'))
-}
+    // Reset style of current
+    resetFocus(links[index])
+    setFocus(links[index - 1])
 
-// Get only links that aren't the related question pair links
- function getVisibleTopLevelLinks() {
-  const [idx, len] = getRelatedQuestionIndex()
+    // Decrease index by one
+    index -= 1
 
-  // Remove len elements starting at idx
-  const topLevelLinks = getTopLevelLinks()
-  topLevelLinks.splice(idx, len)
+    // Scroll to top if hit first link
+    if (index === 0) window.scrollTo(0, 0)
+  }
 
-  return topLevelLinks
-}
+  // Go to link below
+  if (key === 'k') {
+    if (index === links.length - 1) return
+
+    resetFocus(links[index])
+    setFocus(links[index + 1])
+    index += 1
+
+    // Scroll to bottom if hit first link
+    // if (index === links.length - 1) window.scrollTo(0, document.body.scrollHeight)
+  }
+})
 
 // <============= UTILS =============>
 // Check if focused on search bar
