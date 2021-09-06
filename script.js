@@ -1,5 +1,11 @@
- function getTopLevelLinks() {
-  return Array.from(document.querySelectorAll('a > h3'))
+let links = filterRelatedQuestionLinks(getAllTopLevelLinks())
+
+let index = 0
+setFocus(links[0])
+
+// Check if focused on search bar
+function focusedOnSearchBar() {
+  return document.activeElement.tagName === 'INPUT'
 }
 
 document.addEventListener('keydown', async event => {
@@ -41,38 +47,38 @@ document.addEventListener('keydown', async event => {
   }
 })
 
-// <============= UTILS =============>
-// Check if focused on search bar
- function focusedOnSearchBar() {
-  return document.activeElement.tagName === 'INPUT'
+// Gets all top level links in the page
+function getAllTopLevelLinks() {
+  const links = Array.from(document.querySelectorAll('a'))
+  const topLevelLinks = links.filter(link => {
+    return link.querySelector('h3') !== null
+  })
+  return topLevelLinks
 }
 
- function convertKeyToIndex(key) {
-  // Convert to int, subtract one for index
-  const input = parseInt(key)
+// Filter out related question links
+function filterRelatedQuestionLinks(links) {
+  // Get all related questions that pop up on Google
+  const relatedQuestionDiv = Array.from(
+    document.querySelectorAll('.related-question-pair')
+  )
 
-  // Return 10 if it's equal to 0
-  return input === 0 ? 10 : input
+  // Return links directly if no related questions
+  if (relatedQuestionDiv.length === 0) return links
+
+  // Get the first link within one of these divs
+  const firstRelatedLink = relatedQuestionDiv[0].querySelector('a')
+
+  // Get the first related link's index in our array
+  const firstRelatedLinkIdx = links.findIndex(node => node === firstRelatedLink)
+
+  // Trim as many related questions there are
+  const trimAmount = relatedQuestionDiv.length
+  links.splice(firstRelatedLinkIdx, trimAmount)
+
+  // Return the filtered links
+  return links
 }
-
-document.addEventListener('keydown', event => {
-  // Do nothing if focused on search bar
-  if (focusedOnSearchBar()) return
-
-  // Get what key was pressed and if shift pressed
-  const { key, shiftKey } = event
-
-  // Return if key is not a number or isn't backslash
-  const keyIsNumber = !isNaN(parseInt(key))
-  const keyIsBackslash = key === '\\'
-  if (!keyIsNumber && !keyIsBackslash) return
-
-  // Case 1: Pressed shift + number
-  if (shiftKey && keyIsNumber) {
-    const relatedLinks = getRelatedQuestionLinks()
-    const index = convertKeyToIndex(key)
-    relatedLinks[index - 1].click()
-  }
 
 // Sets the link back to white
 function resetFocus(link) {
