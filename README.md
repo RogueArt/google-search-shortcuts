@@ -5,25 +5,31 @@ keyboard shortcuts and navigation to Google search.
 
 # Features
 
-Shortcuts are not active when focused on the search bar.
+To use shortcuts, go to [Google search](https://www.google.com/) and click
+anywhere on the page away from the search bar. Shortcuts DO NOT work when
+focused on the search bar.
 
-- `\`: Expands all "People also search for" questions
-- `0-9`: Will take you to the top level link corresponding to the number pressed
-- `Shift + 0-9`: Will take you to nth "People also search for" link, where n is
-  the number pressed
-
-Note: Pressing 0 is the same as indicating you want to go to the 10th link
+Shortcuts:
+- `j` - Move one search result up
+- `k` - Move one search result down
+- `Enter` - Navigates current tab to the link
+- `Shift+Enter` - Opens a new window with the link
+- `Ctrl+Enter` - Opens new tab in background for the highlighted link
 
 # Installation
 
-This extension is in development, so you can follow installation guidelines for
-an unpacked extension for Chrome and Firefox.
+This plugin can be found in the Firefox add-ons and Chrome extensions pages.
+
+For developers, please follow the instructions for loading an unpacked extension
+onto Firefox or Google Chrome.
 
 # TO-DO
 
-- Shortcut to navigate between links
 - Add support for different Google domains (e.g. co.ca, co.in)
-- Add some sort of tooltip indicating what number each link is
-- Figure out solution to deal with more than 10 links on page
-- Improve README with installation guidelines, link to extension
+- Highlight whole box rather than just the link
+- Allow navigation by pressing a number on the keyboard
+  - Add a super element to indicate what number each link is
+- Improve README with installation guidelines
 - Clean up code by splitting functions into separate files via modules
+- Add `Shift+L` to open all "People also ask links"
+- Improve README with installation guidelines, link to extension

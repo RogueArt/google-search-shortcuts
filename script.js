@@ -1,85 +1,99 @@
- function getTopLevelLinks() {
-  return Array.from(document.querySelectorAll('a > h3'))
-}
+let links = filterRelatedQuestionLinks(getAllTopLevelLinks())
 
- function getRelatedQuestionIndex() {
-  // Get all the links on the page
-  const allLinkNodes = getTopLevelLinks()
-  const questionLinkNodes = getRelatedQuestionLinks()
+let index = 0
+setFocus(links[0])
 
-  // Index to splice from is where first node is equal
-  const index = allLinkNodes.findIndex(node => node === questionLinkNodes[0])
-
-  // Return index and how many elements to splice
-  return [index, questionLinkNodes.length]
-}
-
- function getRelatedQuestionLinks() {
-  // Get all the related questions as nodes, convert to array from NodeList
-  const questionPairNodes = document.querySelectorAll('.related-question-pair')
-  const questionPairArr = Array.from(questionPairNodes)
-
-  // Return only the links
-  return questionPairArr.map(node => node.querySelector('a > h3'))
-}
-
-// Get only links that aren't the related question pair links
- function getVisibleTopLevelLinks() {
-  const [idx, len] = getRelatedQuestionIndex()
-
-  // Remove len elements starting at idx
-  const topLevelLinks = getTopLevelLinks()
-  topLevelLinks.splice(idx, len)
-
-  return topLevelLinks
-}
-
-// <============= UTILS =============>
 // Check if focused on search bar
- function focusedOnSearchBar() {
+function focusedOnSearchBar() {
   return document.activeElement.tagName === 'INPUT'
 }
 
- function convertKeyToIndex(key) {
-  // Convert to int, subtract one for index
-  const input = parseInt(key)
+document.addEventListener('keydown', async event => {
+  const { key } = event
 
-  // Return 10 if it's equal to 0
-  return input === 0 ? 10 : input
-}
-
-document.addEventListener('keydown', event => {
-  // Do nothing if focused on search bar
+  // Don't do anything if on search bar
   if (focusedOnSearchBar()) return
 
-  // Get what key was pressed and if shift pressed
-  const { key, shiftKey } = event
-
-  // Return if key is not a number or isn't backslash
-  const keyIsNumber = !isNaN(parseInt(key))
-  const keyIsBackslash = key === '\\'
-  if (!keyIsNumber && !keyIsBackslash) return
-
-  // Case 1: Pressed shift + number
-  if (shiftKey && keyIsNumber) {
-    const relatedLinks = getRelatedQuestionLinks()
-    const index = convertKeyToIndex(key)
-    relatedLinks[index - 1].click()
+  // Make sure we can access all 10 questions
+  if (links.length < 10) {
+    links = filterRelatedQuestionLinks(getAllTopLevelLinks())
   }
 
-  // Case 2: Pressed a number
-  else if (keyIsNumber) {
-    const visibleLinks = getVisibleTopLevelLinks()
-    const index = convertKeyToIndex(key)
-    visibleLinks[index - 1].click()
+  // Go to link above
+  if (key === 'j') {
+    if (index === 0) return
+
+    // Reset style of current
+    resetFocus(links[index])
+    setFocus(links[index - 1])
+
+    // Decrease index by one
+    index -= 1
+
+    // Scroll to top if hit first link
+    if (index === 0) window.scrollTo(0, 0)
   }
 
-  // Case 3: Pressed backslash \
-  else if (keyIsBackslash) {
-    // Get all related questions and expand them
-    const relatedQuestions = document.querySelectorAll(
-      '.related-question-pair > div > div'
-    )
-    relatedQuestions.forEach(question => question.click())
+  // Go to link below
+  if (key === 'k') {
+    if (index === links.length - 1) return
+
+    resetFocus(links[index])
+    setFocus(links[index + 1])
+    index += 1
+
+    // Scroll to bottom if hit first link
+    // if (index === links.length - 1) window.scrollTo(0, document.body.scrollHeight)
   }
 })
+
+// Gets all top level links in the page
+function getAllTopLevelLinks() {
+  const links = Array.from(document.querySelectorAll('a'))
+  const topLevelLinks = links.filter(link => {
+    return link.querySelector('h3') !== null
+  })
+  return topLevelLinks
+}
+
+// Filter out related question links
+function filterRelatedQuestionLinks(links) {
+  // Get all related questions that pop up on Google
+  const relatedQuestionDiv = Array.from(
+    document.querySelectorAll('.related-question-pair')
+  )
+
+  // Return links directly if no related questions
+  if (relatedQuestionDiv.length === 0) return links
+
+  // Get the first link within one of these divs
+  const firstRelatedLink = relatedQuestionDiv[0].querySelector('a')
+
+  // Get the first related link's index in our array
+  const firstRelatedLinkIdx = links.findIndex(node => node === firstRelatedLink)
+
+  // Trim as many related questions there are
+  const trimAmount = relatedQuestionDiv.length
+  links.splice(firstRelatedLinkIdx, trimAmount)
+
+  // Return the filtered links
+  return links
+}
+
+// Sets the link back to white
+function resetFocus(link) {
+  const textNode = link.getElementsByTagName('h3')[0]
+  textNode.style.fontWeight = ''
+  textNode.style.textDecoration = ''
+}
+
+// Sets the link back to red
+function setFocus(link, goingDown) {
+  const { top } = link.getBoundingClientRect()
+  console.log('top :>> ', top)
+  window.scrollTo(0, top + window.scrollY + (goingDown ? 50 : -50))
+
+  const textNode = link.getElementsByTagName('h3')[0]
+  textNode.style.fontWeight = 'bold'
+  textNode.style.textDecoration = 'underline'
+}
