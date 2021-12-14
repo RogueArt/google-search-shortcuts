@@ -20,7 +20,7 @@ document.addEventListener('keydown', async event => {
   }
 
   // Go to link above
-  if (key === 'j') {
+  if (key === 'k') {
     if (index === 0) return
 
     // Reset style of current
@@ -35,7 +35,7 @@ document.addEventListener('keydown', async event => {
   }
 
   // Go to link below
-  if (key === 'k') {
+  if (key === 'j') {
     if (index === links.length - 1) return
 
     resetFocus(links[index])
