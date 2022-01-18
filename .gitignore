@@ -1,1 +1,9 @@
+# Used for packages
+node_modules
+
+# Used for developer-only files
 dev
+
+# Production files
+dist
+*.zip
