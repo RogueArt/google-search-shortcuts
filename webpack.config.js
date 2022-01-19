@@ -1,4 +1,5 @@
 const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   mode: 'production', // "production" | "development" | "none"
@@ -13,4 +14,9 @@ module.exports = {
     // publicPath: '/assets/', // string
     // the url to the output directory resolved relative to the HTML page
   },
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [path.resolve(__dirname, './src/manifest.json')],
+    }),
+  ],
 }
