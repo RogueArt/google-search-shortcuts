@@ -15,6 +15,15 @@ module.exports = {
     // publicPath: '/assets/', // string
     // the url to the output directory resolved relative to the HTML page
   },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: [/(node_modules)/, /(dev)/]
+      }
+    ]
+  },
   plugins: [
     // Copy manifest.json to dist folder
     new CopyWebpackPlugin({
