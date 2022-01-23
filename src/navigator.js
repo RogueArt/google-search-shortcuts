@@ -20,7 +20,9 @@ export class LinksNavigator {
     this.links = filterRelatedQuestionLinks(getAllTopLevelLinks())
     this.linkNumber = 0
 
-    this.setFocus(this.links[0])
+    // TODO - figure out why Google switches focus from this element
+    // Currently set focus with a delay to avoid issue 
+    setTimeout(() => this.setFocus(this.links[0]), 50)
   }
 
   /**
@@ -87,6 +89,9 @@ export class LinksNavigator {
 
     // Otherwise offset a bit for all other links
     else window.scrollTo(0, top + window.scrollY - 80)
+
+    // Set focus on the link
+    link.focus()
 
     const textNode = link.getElementsByTagName('h3')[0]
     textNode.style.fontWeight = 'bold'
