@@ -47,5 +47,3 @@ export function setFocus(link, goingDown) {
   textNode.style.fontWeight = 'bold'
   textNode.style.textDecoration = 'underline'
 }
-
-console.log('Hello from utils.js')
