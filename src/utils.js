@@ -1,54 +1,5 @@
-let links = filterRelatedQuestionLinks(getAllTopLevelLinks())
-
-let index = 0
-setFocus(links[0])
-
-// Check if focused on search bar
-function focusedOnSearchBar() {
-  return document.activeElement.tagName === 'INPUT'
-}
-
-document.addEventListener('keydown', async event => {
-  const { key } = event
-
-  // Don't do anything if on search bar
-  if (focusedOnSearchBar()) return
-
-  // Make sure we can access all 10 questions
-  if (links.length < 10) {
-    links = filterRelatedQuestionLinks(getAllTopLevelLinks())
-  }
-
-  // Go to link above
-  if (key === 'k') {
-    if (index === 0) return
-
-    // Reset style of current
-    resetFocus(links[index])
-    setFocus(links[index - 1])
-
-    // Decrease index by one
-    index -= 1
-
-    // Scroll to top if hit first link
-    if (index === 0) window.scrollTo(0, 0)
-  }
-
-  // Go to link below
-  if (key === 'j') {
-    if (index === links.length - 1) return
-
-    resetFocus(links[index])
-    setFocus(links[index + 1])
-    index += 1
-
-    // Scroll to bottom if hit first link
-    // if (index === links.length - 1) window.scrollTo(0, document.body.scrollHeight)
-  }
-})
-
 // Gets all top level links in the page
-function getAllTopLevelLinks() {
+export function getAllTopLevelLinks() {
   const links = Array.from(document.querySelectorAll('a'))
   const topLevelLinks = links.filter(link => {
     return link.querySelector('h3') !== null
@@ -57,7 +8,7 @@ function getAllTopLevelLinks() {
 }
 
 // Filter out related question links
-function filterRelatedQuestionLinks(links) {
+export function filterRelatedQuestionLinks(links) {
   // Get all related questions that pop up on Google
   const relatedQuestionDiv = Array.from(
     document.querySelectorAll('.related-question-pair')
@@ -81,16 +32,15 @@ function filterRelatedQuestionLinks(links) {
 }
 
 // Sets the link back to white
-function resetFocus(link) {
+export function resetFocus(link) {
   const textNode = link.getElementsByTagName('h3')[0]
   textNode.style.fontWeight = ''
   textNode.style.textDecoration = ''
 }
 
 // Sets the link back to red
-function setFocus(link, goingDown) {
+export function setFocus(link, goingDown) {
   const { top } = link.getBoundingClientRect()
-  console.log('top :>> ', top)
   window.scrollTo(0, top + window.scrollY + (goingDown ? 50 : -50))
 
   const textNode = link.getElementsByTagName('h3')[0]
