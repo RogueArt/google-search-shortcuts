@@ -10,8 +10,8 @@ anywhere on the page away from the search bar. Shortcuts DO NOT work when
 focused on the search bar.
 
 Shortcuts:
-- `j` - Move one search result up
-- `k` - Move one search result down
+- `k` - Move one search result up
+- `j` - Move one search result down
 - `Enter` - Navigates current tab to the link
 - `Shift+Enter` - Opens a new window with the link
 - `Ctrl+Enter` - Opens new tab in background for the highlighted link
