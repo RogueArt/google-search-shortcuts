@@ -5,7 +5,6 @@ export function getAllTopLevelLinks() {
     return link.querySelector('h3') !== null
   })
 
-  console.log(topLevelLinks)
   return topLevelLinks
 }
 
