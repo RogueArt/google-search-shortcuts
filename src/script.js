@@ -1,11 +1,19 @@
 import { LinksNavigator } from './navigator.js'
 
-// Monitor document as new content loads in
-document.addEventListener('readystatechange', (event) => {
-  // Wait until document is complete
-  if (document.readyState !== 'complete') return
+// Check if the document is already complete
+if (document.readyState !== 'complete') {
+  // Monitor document as new content loads in
+  document.addEventListener('readystatechange', () => {
+    // Wait until document is complete before initializing
+    if (document.readyState !== 'complete') return
+    initializeExtension()
+  })
+}
+else initializeExtension()
 
-  const navigator = new LinksNavigator() 
+// Load everything we need for the extension here
+function initializeExtension() {
+  const navigator = new LinksNavigator()
   document.addEventListener('keydown', async event => {
     const { key } = event
 
@@ -16,4 +24,4 @@ document.addEventListener('readystatechange', (event) => {
     if (key === 'k') navigator.goToLinkAbove()
     if (key === 'j') navigator.goToLinkBelow()
   })
-})
+}
