@@ -1,7 +1,7 @@
 {
   "name": "Google Search Shortcuts",
   "description": "Keyboard shortcuts to make searching on Google faster",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "manifest_version": 2,
   "content_scripts": [
     {
