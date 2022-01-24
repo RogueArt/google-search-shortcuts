@@ -1,6 +1,6 @@
 {
   "name": "google-shortcuts-extension",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Google Search Shortcuts is a Chrome and Firefox extension that adds much-needed\r keyboard shortcuts and navigation to Google search.",
   "main": "script.js",
   "scripts": {
