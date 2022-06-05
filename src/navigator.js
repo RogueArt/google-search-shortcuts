@@ -21,7 +21,7 @@ export class LinksNavigator {
     this.linkNumber = 0
 
     // TODO - figure out why Google switches focus from this element
-    // Currently set focus with a delay to avoid issue 
+    // Currently set focus with a delay to avoid issue
     setTimeout(() => this.setFocus(this.links[0]), 50)
   }
 
@@ -83,12 +83,9 @@ export class LinksNavigator {
    */
   setFocus(link) {
     const { top } = link.getBoundingClientRect()
-    
+
     // If it's the first link, go all the way to top
     if (link === this.links[0]) window.scrollTo(0, 0)
-
-    // Otherwise offset a bit for all other links
-    else window.scrollTo(0, top + window.scrollY - 80)
 
     // Set focus on the link
     link.focus()
