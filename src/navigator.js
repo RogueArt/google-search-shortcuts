@@ -106,6 +106,6 @@ export class LinksNavigator {
     if (activeElement === null) return false
 
     // Make sure that the active element is an input
-    return activeElement.tagName === 'INPUT'
+    return ['TEXTAREA', 'INPUT'].includes(activeElement.tagName)
   }
 }
