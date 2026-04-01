@@ -1,5 +1,4 @@
 import {
-  filterRelatedQuestionLinks,
   getAllTopLevelLinks,
 } from './utils.js'
 
@@ -17,7 +16,7 @@ import {
 export class LinksNavigator {
   constructor() {
     // Filter the question links from all top level links
-    this.links = filterRelatedQuestionLinks(getAllTopLevelLinks())
+    this.links = getAllTopLevelLinks()
     this.linkNumber = 0
 
     // TODO - figure out why Google switches focus from this element
