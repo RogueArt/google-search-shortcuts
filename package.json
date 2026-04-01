@@ -1,6 +1,6 @@
 {
   "name": "google-shortcuts-extension",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "description": "Google Search Shortcuts is a Chrome and Firefox extension that adds much-needed\r keyboard shortcuts and navigation to Google search.",
   "main": "script.js",
   "scripts": {
@@ -18,8 +18,9 @@
   },
   "homepage": "https://github.com/RogueArt/google-search-shortcuts#readme",
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^8.2.3",
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-loader": "^10.1.1",
     "copy-webpack-plugin": "^10.2.1",
     "webpack": "^5.67.0",
     "webpack-cli": "^4.9.1",
