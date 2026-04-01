@@ -1,4 +1,4 @@
-// Gets all top level links in the page
+// Top-level link = big blue links that show up on search results page
 export function getAllTopLevelLinks() {
   const links = [...document.querySelectorAll('a')]
   const topLevelLinks = links.filter(link => {
