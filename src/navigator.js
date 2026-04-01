@@ -13,21 +13,45 @@ export class LinksNavigator {
     })
   }
 
-  goToLinkAbove() { this.moveFocusTo(this.curIndex - 1) }
-  goToLinkBelow() { this.moveFocusTo(this.curIndex + 1) }
+  goToLinkAbove() { this.moveFocusBy(-1) }
+  goToLinkBelow() { this.moveFocusBy(1) }
 
-  moveFocusTo(toIndex) {
-    if (toIndex < 0 || toIndex >= this.links.length) return
+  moveFocusBy(delta) {
+    const oldLinks = this.links
+    const oldCurIndex = this.curIndex
+    const prevLink = oldLinks[oldCurIndex]
 
-    this.resetFocus(this.curIndex)
-    this.setFocus(toIndex)
-    this.curIndex = toIndex
+    this.links = getAllTopLevelLinks()
+
+    // Factors in the fact that the user may have opened/viewed links
+    // BEFORE the current link. Which causes our index to "jump" forward
+    const curIndex = this.links.indexOf(prevLink)
+
+    // Simple case: going to next link
+    if (curIndex !== -1) {
+      const nextIndex = curIndex + delta
+      if (nextIndex < 0 || nextIndex >= this.links.length) { return }
+
+      this.resetFocus(curIndex)
+      this.setFocus(nextIndex)
+      this.curIndex = nextIndex
+      return
+    }
+
+    // Edgecase: user opened link -> viewed it -> closed it -> proceeds to navigate
+    const nextIndex = this.findNextIndexFromDeletedLink(oldLinks, oldCurIndex, delta)
+    if (nextIndex === -1) { return }
+
+    this.setFocus(nextIndex)
+    this.curIndex = nextIndex
   }
 
   resetFocus(index) {
     const link = this.links[index]
+    if (!link) { return }
+
     const textNode = link.querySelector('h3')
-    if (!textNode) return
+    if (!textNode) { return }
 
     textNode.style.fontWeight = ''
     textNode.style.textDecoration = ''
@@ -38,10 +62,11 @@ export class LinksNavigator {
     if (index === 0) { window.scrollTo(0, 0) }
 
     const link = this.links[index]
+    if (!link) { return }
     link.focus()
 
     const textNode = link.querySelector('h3')
-    if (!textNode) return
+    if (!textNode) { return }
 
     textNode.style.fontWeight = 'bold'
     textNode.style.textDecoration = 'underline'
