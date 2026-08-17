@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./src/icons/icon-128.png" alt="Google Search Shortcuts icon" width="96" height="96">
+
 <h1>Google Search Shortcuts</h1>
 
 <p><strong>Move through Google Search results without leaving the keyboard.</strong></p>
