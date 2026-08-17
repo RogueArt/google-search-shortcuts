@@ -75,6 +75,7 @@ for (const target of TARGETS) {
   assert.equal(action.default_popup, 'popup.html')
   assert.deepEqual(manifest.permissions, ['storage'])
   assert.equal('host_permissions' in manifest, false)
+  assert.equal(manifest.content_scripts[0].run_at, 'document_end')
 
   if (target === 'firefox') {
     assert.equal(manifest.manifest_version, 2)
