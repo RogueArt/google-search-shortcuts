@@ -1,12 +1,13 @@
 {
   "name": "Google Search Shortcuts",
   "description": "Keyboard shortcuts to make searching on Google faster",
-  "version": "1.0.0",
-  "manifest_version": 2,
+  "permissions": ["storage"],
+  "toolbar_popup": "popup.html",
   "content_scripts": [
     {
       "matches": ["*://*.google.com/search*"],
-      "js": ["script.js"]
+      "js": ["script.js"],
+      "css": ["content.css"]
     }
   ]
 }

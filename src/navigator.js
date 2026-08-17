@@ -1,81 +1,139 @@
 import {
-  getAllTopLevelLinks,
-} from './utils.js'
+  getAllLinkGroups,
+  getLinkTextNode,
+} from './google-results.js'
+import {
+  createNavigationIndex,
+  findOccurrenceByElement,
+  getMovementTarget,
+  resolveMovement,
+} from './navigation-index.js'
+
+export const HIGHLIGHT_CLASS = 'google-search-shortcuts-highlight'
+
+function isEditableElement(element) {
+  if (!element || element.nodeType !== 1) return false
+
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)) return true
+  if (element.isContentEditable) return true
+
+  return Boolean(element.closest(
+    '[contenteditable=""], [contenteditable="true"], [role="textbox"], [role="combobox"]',
+  ))
+}
+
+export function isEditing(documentRef, eventTarget = null) {
+  return (
+    isEditableElement(eventTarget)
+    || isEditableElement(documentRef.activeElement)
+  )
+}
 
 export class LinksNavigator {
-  constructor() {
-    this.links = getAllTopLevelLinks()
-    this.curIndex = 0
+  constructor({
+    documentRef = document,
+    windowRef = window,
+    collectGroups = getAllLinkGroups,
+  } = {}) {
+    this.document = documentRef
+    this.window = windowRef
+    this.collectGroups = collectGroups
+    this.highlightedLabel = null
+    this.destroyed = false
+    this.index = this.createCurrentIndex()
+    this.cursor = this.index.mainOrder[0] || null
 
-    window.requestAnimationFrame(() => {
-      if (this.links.length === 0) { return }
-      this.setFocus(this.curIndex)
+    this.window.requestAnimationFrame(() => {
+      if (this.destroyed) return
+
+      const refreshed = this.createCurrentIndex()
+      this.index = refreshed.mainOrder.length > 0 ? refreshed : this.index
+      this.cursor = this.index.mainOrder[0] || this.cursor
+      if (this.cursor) this.select(this.cursor)
     })
   }
 
-  goToLinkAbove() { this.moveFocusBy(-1) }
-  goToLinkBelow() { this.moveFocusBy(1) }
+  createCurrentIndex() {
+    return createNavigationIndex(this.collectGroups(this.document))
+  }
 
-  moveFocusBy(delta) {
-    const oldLinks = this.links
-    const oldCurIndex = this.curIndex
-    const prevLink = oldLinks[oldCurIndex]
+  move(command) {
+    const refreshedIndex = this.createCurrentIndex()
+    const activeOccurrence = findOccurrenceByElement(
+      refreshedIndex,
+      this.document.activeElement,
+      this.cursor,
+    )
 
-    this.links = getAllTopLevelLinks()
-
-    // Factors in the fact that the user may have opened/viewed links
-    // BEFORE the current link. Which causes our index to "jump" forward
-    const curIndex = this.links.indexOf(prevLink)
-
-    // Simple case: going to next link
-    if (curIndex !== -1) {
-      const nextIndex = curIndex + delta
-      if (nextIndex < 0 || nextIndex >= this.links.length) { return }
-
-      this.resetFocus(curIndex)
-      this.setFocus(nextIndex)
-      this.curIndex = nextIndex
-      return
+    if (activeOccurrence) {
+      const activeChanged = (
+        !this.cursor
+        || activeOccurrence.element !== this.cursor.element
+        || activeOccurrence.kind !== this.cursor.kind
+      )
+      const activeLabel = getLinkTextNode(activeOccurrence.element)
+      const markerChanged = (
+        activeLabel !== this.highlightedLabel
+        || !activeLabel
+        || !activeLabel.classList.contains(HIGHLIGHT_CLASS)
+      )
+      const target = getMovementTarget(refreshedIndex, activeOccurrence, command)
+      this.index = refreshedIndex
+      this.cursor = target || activeOccurrence
+      if (target || activeChanged || markerChanged) this.select(this.cursor)
+      return Boolean(target)
     }
 
-    // Edgecase: user opened link -> viewed it -> closed it -> proceeds to navigate
-    const nextIndex = this.findNextIndexFromDeletedLink(oldLinks, oldCurIndex, delta)
-    if (nextIndex === -1) { return }
+    const previousCursor = this.cursor
+    const movement = resolveMovement(
+      this.index,
+      this.cursor,
+      refreshedIndex,
+      command,
+    )
 
-    this.setFocus(nextIndex)
-    this.curIndex = nextIndex
+    this.index = movement.index
+    this.cursor = movement.cursor
+
+    const cursorWasReplaced = (
+      !movement.target
+      && previousCursor
+      && this.cursor
+      && previousCursor.element !== this.cursor.element
+    )
+
+    if (movement.target || cursorWasReplaced) this.select(this.cursor)
+    return Boolean(movement.target)
   }
 
-  resetFocus(index) {
-    const link = this.links[index]
-    if (!link) { return }
+  clearHighlight() {
+    if (!this.highlightedLabel) return
 
-    const textNode = link.querySelector('h3')
-    if (!textNode) { return }
-
-    textNode.style.fontWeight = ''
-    textNode.style.textDecoration = ''
+    this.highlightedLabel.classList.remove(HIGHLIGHT_CLASS)
+    this.highlightedLabel = null
   }
 
-  setFocus(index) {
-    // If it's the first link, go all the way to top
-    if (index === 0) { window.scrollTo(0, 0) }
+  select(occurrence) {
+    if (!occurrence || !occurrence.element) return
 
-    const link = this.links[index]
-    if (!link) { return }
-    link.focus()
+    this.clearHighlight()
+    this.cursor = occurrence
 
-    const textNode = link.querySelector('h3')
-    if (!textNode) { return }
+    if (this.index.mainOrder[0] === occurrence) {
+      this.window.scrollTo(0, 0)
+    }
 
-    textNode.style.fontWeight = 'bold'
-    textNode.style.textDecoration = 'underline'
+    occurrence.element.focus()
+
+    const label = getLinkTextNode(occurrence.element)
+    if (!label) return
+
+    label.classList.add(HIGHLIGHT_CLASS)
+    this.highlightedLabel = label
   }
 
-  isFocusedOnInput() {
-    const { activeElement } = document
-    if (activeElement === null) return false
-
-    return ['TEXTAREA', 'INPUT'].includes(activeElement.tagName)
+  destroy() {
+    this.destroyed = true
+    this.clearHighlight()
   }
 }

@@ -1,0 +1,84 @@
+body {
+  box-sizing: border-box;
+  width: 360px;
+  margin: 0;
+  padding: 16px;
+  color: #172033;
+  background: #fff;
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.shortcut-row {
+  margin-bottom: 14px;
+}
+
+.shortcut-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.shortcut-button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #aeb7c6;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.shortcut-button:hover:not(:disabled),
+.shortcut-button:focus-visible {
+  border-color: #2563eb;
+}
+
+.shortcut-button.recording {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.shortcut-button:disabled,
+.actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.shortcut-help {
+  margin-top: 4px;
+  color: #4b5563;
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.actions button {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #aeb7c6;
+  border-radius: 6px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.status {
+  min-height: 16px;
+  margin-top: 12px;
+  color: #0f6b42;
+  font-size: 12px;
+}
+
+.status.error {
+  color: #9f2727;
+}

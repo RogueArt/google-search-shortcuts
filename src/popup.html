@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Google Search Shortcuts</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <h1>Keyboard Shortcuts</h1>
+
+  <div class="shortcut-row">
+    <label class="shortcut-label" for="nextMain">Next main result</label>
+    <button id="nextMain" class="shortcut-button" type="button"></button>
+    <div class="shortcut-help">Moves to the next main result</div>
+  </div>
+
+  <div class="shortcut-row">
+    <label class="shortcut-label" for="prevMain">Previous main result</label>
+    <button id="prevMain" class="shortcut-button" type="button"></button>
+    <div class="shortcut-help">Moves to the previous main result</div>
+  </div>
+
+  <div class="shortcut-row">
+    <label class="shortcut-label" for="nextDetailed">Next detailed result</label>
+    <button id="nextDetailed" class="shortcut-button" type="button"></button>
+    <div class="shortcut-help">Moves through sublinks, then to the next main result</div>
+  </div>
+
+  <div class="shortcut-row">
+    <label class="shortcut-label" for="prevDetailed">Previous detailed result</label>
+    <button id="prevDetailed" class="shortcut-button" type="button"></button>
+    <div class="shortcut-help">Moves backward through sublinks, then to the previous main result</div>
+  </div>
+
+  <div class="actions">
+    <button id="resetDefaults" type="button">Reset defaults</button>
+  </div>
+
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
