@@ -31,7 +31,7 @@ function makeGroup(documentRef, id, detailIds = []) {
   return { mainLink, subLinks }
 }
 
-function setupNavigator(initialGroups) {
+function setupNavigator(initialGroups, beforeCreate = () => {}) {
   const { window } = createDom()
   let animationFrame = null
   const scrollCalls = []
@@ -42,6 +42,7 @@ function setupNavigator(initialGroups) {
   window.scrollTo = (...args) => scrollCalls.push(args)
 
   let groups = initialGroups(window.document)
+  beforeCreate(window.document)
   const navigator = new LinksNavigator({
     documentRef: window.document,
     windowRef: window,
@@ -51,26 +52,60 @@ function setupNavigator(initialGroups) {
   return {
     window,
     navigator,
-    runAnimationFrame: () => animationFrame(),
+    hasQueuedAnimationFrame: () => animationFrame !== null,
+    runAnimationFrame: () => {
+      if (!animationFrame) return
+      const callback = animationFrame
+      animationFrame = null
+      callback()
+    },
     setGroups: value => { groups = value },
     scrollCalls,
   }
 }
 
-test('initialization focuses the real first anchor and marks only its label', () => {
+test('initialization immediately focuses the first anchor and marks its label', () => {
   const setup = setupNavigator(documentRef => [
     makeGroup(documentRef, 'A'),
     makeGroup(documentRef, 'B'),
   ])
 
-  setup.runAnimationFrame()
-
   assert.equal(setup.window.document.activeElement.dataset.id, 'A')
+  assert.equal(setup.hasQueuedAnimationFrame(), false)
   assert.equal(
     setup.window.document.querySelector('h3').classList.contains(HIGHLIGHT_CLASS),
     true,
   )
   assert.deepEqual(setup.scrollCalls, [[0, 0]])
+})
+
+test('initialization preserves focus that is already on an editable control', () => {
+  let searchInput
+  const setup = setupNavigator(documentRef => {
+    searchInput = documentRef.createElement('input')
+    documentRef.body.append(searchInput)
+    return [makeGroup(documentRef, 'A'), makeGroup(documentRef, 'B')]
+  }, () => searchInput.focus())
+
+  assert.equal(setup.window.document.activeElement, searchInput)
+  assert.equal(setup.navigator.cursor, null)
+  assert.equal(setup.hasQueuedAnimationFrame(), false)
+})
+
+test('delayed results do not steal focus acquired before the retry frame', () => {
+  const setup = setupNavigator(() => [])
+  const searchInput = setup.window.document.createElement('input')
+  setup.window.document.body.append(searchInput)
+  searchInput.focus()
+
+  setup.setGroups([
+    makeGroup(setup.window.document, 'A'),
+    makeGroup(setup.window.document, 'B'),
+  ])
+  setup.runAnimationFrame()
+
+  assert.equal(setup.window.document.activeElement, searchInput)
+  assert.equal(setup.navigator.cursor, null)
 })
 
 test('moving removes only the extension class and preserves authored inline styles', () => {

@@ -1,11 +1,11 @@
 # Testing and coverage
 
-The suite contains 53 source-level tests plus four built-bundle smoke scenarios.
+The suite contains 57 source-level tests plus four built-bundle smoke scenarios.
 `npm run test:coverage` enforces at least 95% line coverage, 95% function
 coverage, and 80% branch coverage across `src/*.js`.
-The current measured result is 97.77% lines, 84.05% branches, and 100% functions.
+The current measured result is 97.80% lines, 84.29% branches, and 100% functions.
 
-## What the 53 tests cover
+## What the 57 tests cover
 
 ### Browser API selection — 3 tests
 
@@ -35,9 +35,11 @@ The current measured result is 97.77% lines, 84.05% branches, and 100% functions
 - Conservative behavior for duplicate results, href mutation, and boundary
   replacement.
 
-### DOM navigator — 8 tests
+### DOM navigator — 10 tests
 
-- Initial focus, marker placement, and scroll position.
+- Immediate initial focus, marker placement, and scroll position.
+- Preservation of user focus both before initialization and while a delayed
+  result scan is pending.
 - Marker cleanup without changing Google's inline styles.
 - Empty-result and deleted-result recovery.
 - Synchronization when the user focuses a result outside the extension.
@@ -52,15 +54,17 @@ The current measured result is 97.77% lines, 84.05% branches, and 100% functions
 - Resetting and persisting defaults.
 - Storage read/write failure recovery while keeping the popup usable.
 
-### Content-script controller — 9 tests
+### Content-script controller — 11 tests
 
 - Shortcut dispatch, default prevention, listener registration, and cleanup.
 - Suppression inside inputs and contenteditable controls.
+- Search-box focus and native Space behavior during initialization.
+- Default-shortcut availability while saved settings are still loading.
 - Live local-storage shortcut updates and irrelevant/sync-change filtering.
 - Shift+J/Shift+K detailed traversal through an actual DOM fixture.
 - Default operation after a storage read failure.
 - Native Enter variants remain untouched.
-- Both delayed and already-complete document startup paths initialize once.
+- Both DOMContentLoaded and already-interactive startup paths initialize once.
 
 ### Shortcut rules — 5 tests
 

@@ -41,16 +41,33 @@ export class LinksNavigator {
     this.highlightedLabel = null
     this.destroyed = false
     this.index = this.createCurrentIndex()
-    this.cursor = this.index.mainOrder[0] || null
+    this.cursor = null
 
-    this.window.requestAnimationFrame(() => {
-      if (this.destroyed) return
+    const firstResult = this.index.mainOrder[0] || null
+    if (firstResult && this.canAutofocus()) {
+      this.select(firstResult)
+    } else if (!firstResult) {
+      this.window.requestAnimationFrame(() => this.retryInitialFocus())
+    }
+  }
 
-      const refreshed = this.createCurrentIndex()
-      this.index = refreshed.mainOrder.length > 0 ? refreshed : this.index
-      this.cursor = this.index.mainOrder[0] || this.cursor
-      if (this.cursor) this.select(this.cursor)
-    })
+  canAutofocus() {
+    const activeElement = this.document.activeElement
+    return (
+      !activeElement
+      || activeElement === this.document.body
+      || activeElement === this.document.documentElement
+    )
+  }
+
+  retryInitialFocus() {
+    if (this.destroyed) return
+
+    const refreshed = this.createCurrentIndex()
+    if (refreshed.mainOrder.length > 0) this.index = refreshed
+
+    const firstResult = this.index.mainOrder[0] || null
+    if (firstResult && this.canAutofocus()) this.select(firstResult)
   }
 
   createCurrentIndex() {

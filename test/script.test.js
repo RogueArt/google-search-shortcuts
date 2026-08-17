@@ -3,7 +3,7 @@ import test from 'node:test'
 
 import {
   initializeExtension,
-  startWhenDocumentIsComplete,
+  startWhenDocumentIsReady,
 } from '../src/script.js'
 import { createDom, setRect } from '../test-support/dom.js'
 
@@ -128,6 +128,46 @@ test('input and contenteditable focus suppress navigation without preventing key
   cleanup()
 })
 
+test('initialization never takes focus from a search box or handles its Space key', async () => {
+  const window = createSearchPage()
+  const search = window.document.getElementById('search')
+  search.focus()
+
+  const cleanup = await initializeExtension({
+    documentRef: window.document,
+    windowRef: window,
+    browserApi: createBrowserApi(),
+  })
+  const event = dispatchKey(window, ' ')
+
+  assert.equal(window.document.activeElement, search)
+  assert.equal(event.defaultPrevented, false)
+  cleanup()
+})
+
+test('default shortcuts work while saved shortcuts are still loading', async () => {
+  const window = createSearchPage()
+  const browserApi = createBrowserApi()
+  let finishStorageRead
+  browserApi.storage.local.get = () => new Promise(resolve => {
+    finishStorageRead = resolve
+  })
+
+  const initialized = initializeExtension({
+    documentRef: window.document,
+    windowRef: window,
+    browserApi,
+  })
+
+  assert.equal(browserApi.listenerCount(), 1)
+  assert.equal(dispatchKey(window, 'j').defaultPrevented, true)
+  assert.equal(window.document.activeElement.id, 'B')
+
+  finishStorageRead({})
+  const cleanup = await initialized
+  cleanup()
+})
+
 test('storage changes update shortcuts on an open results page', async () => {
   const window = createSearchPage()
   const browserApi = createBrowserApi()
@@ -229,7 +269,7 @@ test('Enter variants remain unhandled for native Firefox link activation', async
   cleanup()
 })
 
-test('startup waits for complete and initializes exactly once', async () => {
+test('startup waits for DOMContentLoaded and initializes exactly once', async () => {
   const window = createSearchPage()
   const browserApi = createBrowserApi()
   let readyState = 'loading'
@@ -238,32 +278,32 @@ test('startup waits for complete and initializes exactly once', async () => {
     get: () => readyState,
   })
 
-  const started = startWhenDocumentIsComplete({
+  const started = startWhenDocumentIsReady({
     documentRef: window.document,
     windowRef: window,
     browserApi,
   })
   assert.equal(browserApi.listenerCount(), 0)
 
-  readyState = 'complete'
-  window.document.dispatchEvent(new window.Event('readystatechange'))
+  readyState = 'interactive'
+  window.document.dispatchEvent(new window.Event('DOMContentLoaded'))
   const cleanup = await started
 
   assert.equal(browserApi.listenerCount(), 1)
-  window.document.dispatchEvent(new window.Event('readystatechange'))
+  window.document.dispatchEvent(new window.Event('DOMContentLoaded'))
   assert.equal(browserApi.listenerCount(), 1)
   cleanup()
 })
 
-test('startup initializes immediately when the document is already complete', async () => {
+test('startup initializes immediately when the document is interactive', async () => {
   const window = createSearchPage()
   const browserApi = createBrowserApi()
   Object.defineProperty(window.document, 'readyState', {
     configurable: true,
-    value: 'complete',
+    value: 'interactive',
   })
 
-  const cleanup = await startWhenDocumentIsComplete({
+  const cleanup = await startWhenDocumentIsReady({
     documentRef: window.document,
     windowRef: window,
     browserApi,

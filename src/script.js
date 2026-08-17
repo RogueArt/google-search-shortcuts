@@ -17,17 +17,13 @@ export async function initializeExtension({
 
   const navigator = new LinksNavigator({ documentRef, windowRef })
   let shortcuts = createDefaultShortcuts()
-
-  try {
-    shortcuts = await getStoredShortcuts(browserApi.storage.local)
-  } catch (error) {
-    logger.warn('Google Search Shortcuts could not load saved shortcuts.', error)
-  }
+  let shortcutRevision = 0
 
   const handleStorageChange = (changes, areaName) => {
     if (areaName && areaName !== 'local') return
     if (!changes.shortcuts) return
 
+    shortcutRevision += 1
     shortcuts = decodeShortcuts(changes.shortcuts.newValue)
   }
 
@@ -44,6 +40,13 @@ export async function initializeExtension({
   browserApi.storage.onChanged.addListener(handleStorageChange)
   documentRef.addEventListener('keydown', handleKeydown)
 
+  try {
+    const storedShortcuts = await getStoredShortcuts(browserApi.storage.local)
+    if (shortcutRevision === 0) shortcuts = storedShortcuts
+  } catch (error) {
+    logger.warn('Google Search Shortcuts could not load saved shortcuts.', error)
+  }
+
   return () => {
     browserApi.storage.onChanged.removeListener(handleStorageChange)
     documentRef.removeEventListener('keydown', handleKeydown)
@@ -51,26 +54,24 @@ export async function initializeExtension({
   }
 }
 
-export function startWhenDocumentIsComplete(options = {}) {
+export function startWhenDocumentIsReady(options = {}) {
   const documentRef = options.documentRef || document
 
-  if (documentRef.readyState === 'complete') {
+  if (documentRef.readyState !== 'loading') {
     return initializeExtension(options)
   }
 
   return new Promise(resolve => {
-    const handleReadyStateChange = () => {
-      if (documentRef.readyState !== 'complete') return
-
-      documentRef.removeEventListener('readystatechange', handleReadyStateChange)
+    const handleDomReady = () => {
+      documentRef.removeEventListener('DOMContentLoaded', handleDomReady)
       resolve(initializeExtension(options))
     }
 
-    documentRef.addEventListener('readystatechange', handleReadyStateChange)
+    documentRef.addEventListener('DOMContentLoaded', handleDomReady)
   })
 }
 
 if (typeof document !== 'undefined') {
   const browserApi = getExtensionApi()
-  if (browserApi) startWhenDocumentIsComplete({ browserApi })
+  if (browserApi) startWhenDocumentIsReady({ browserApi })
 }
