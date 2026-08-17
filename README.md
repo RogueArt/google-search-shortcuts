@@ -148,6 +148,8 @@ both production builds, package verification, and built-bundle smoke tests.
 | `npm run build` | Build Firefox and Chromium packages |
 | `npm run build:firefox` | Build only Firefox |
 | `npm run build:chromium` | Build only Chrome/Edge |
+| `npm run build-for-amo` | Build and verify the Firefox and AMO source packages |
+| `npm run package:source` | Recreate only the versioned AMO source ZIP |
 | `npm run verify-build` | Verify manifests, file allowlists, and ZIP parity |
 | `npm run smoke-build` | Execute both bundled extensions against browser API mocks |
 
@@ -157,9 +159,29 @@ both production builds, package verification, and built-bundle smoke tests.
 | --- | --- | --- |
 | Firefox | `dist/firefox/` | `dist/packages/google-search-shortcuts-firefox.zip` |
 | Chrome / Edge | `dist/chromium/` | `dist/packages/google-search-shortcuts-chromium.zip` |
+| AMO reviewer source | — | `dist/packages/google-search-shortcuts-2.0.0-source.zip` |
 
 The shared JavaScript, CSS, and HTML are verified byte-for-byte across the two
 browser packages. Only browser-specific manifest metadata differs.
+
+### Prepare a Firefox Add-ons submission
+
+Run the dedicated AMO release command from a clean checkout:
+
+```bash
+npm ci
+npm run build-for-amo
+```
+
+Upload `google-search-shortcuts-firefox.zip` as the add-on and
+`google-search-shortcuts-2.0.0-source.zip` as its source code. Both are written
+to `dist/packages/`. The source ZIP contains only original project files from
+an explicit allowlist—no `node_modules`, `dist`, bundled JavaScript, or other
+machine-generated source—and the verifier checks every archived byte.
+
+See [docs/amo-source-submission.md](docs/amo-source-submission.md) for the exact
+cross-platform environment and reviewer build instructions included in the
+source archive.
 
 ## Install a development build
 

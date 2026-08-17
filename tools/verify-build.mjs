@@ -12,8 +12,15 @@ const ICONS = {
   128: 'icons/icon-128.png',
 }
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
+const sourceFiles = JSON.parse(
+  await readFile('tools/source-files.json', 'utf8'),
+)
 
 assert.equal(packageJson.license, 'MPL-2.0')
+assert.equal(
+  packageJson.scripts['package:source'],
+  'node tools/build-source-archive.mjs',
+)
 
 function readZip(filename) {
   return new Promise((resolve, reject) => {
@@ -33,6 +40,7 @@ function readZip(filename) {
           const normalized = path.posix.normalize(entry.fileName)
           if (
             path.posix.isAbsolute(entry.fileName)
+            || entry.fileName.includes('\\')
             || normalized === '..'
             || normalized.startsWith('../')
           ) {
@@ -173,4 +181,27 @@ for (const target of TARGETS) {
   }
 }
 
-console.log('Verified Firefox MV2 and Chromium MV3 packages, shared assets, manifests, and ZIP contents.')
+assert.equal(new Set(sourceFiles).size, sourceFiles.length)
+const expectedSourceFiles = [...sourceFiles].sort()
+const sourceArchivePath = `dist/packages/google-search-shortcuts-${packageJson.version}-source.zip`
+const archivedSourceFiles = await readZip(sourceArchivePath)
+
+assert.deepEqual([...archivedSourceFiles.keys()].sort(), expectedSourceFiles)
+
+for (const file of expectedSourceFiles) {
+  const repositoryFile = await readFile(file)
+  assert.equal(
+    archivedSourceFiles.get(file).equals(repositoryFile),
+    true,
+    `${file} must be unchanged in the source ZIP`,
+  )
+}
+
+const reviewerInstructions = archivedSourceFiles
+  .get('docs/amo-source-submission.md')
+  .toString('utf8')
+assert.match(reviewerInstructions, /npm ci/)
+assert.match(reviewerInstructions, /npm run build-for-amo/)
+assert.match(reviewerInstructions, /Node\.js 22\.13\.0 or newer/)
+
+console.log('Verified Firefox MV2, Chromium MV3, and AMO source packages, manifests, shared assets, and ZIP contents.')

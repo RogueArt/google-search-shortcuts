@@ -5,16 +5,17 @@
   "type": "module",
   "scripts": {
     "clean": "node tools/clean-dist.mjs",
-    "build": "npm run clean && webpack --config webpack.config.cjs",
+    "build": "npm run clean && webpack --config webpack.config.cjs && npm run package:source",
     "build:firefox": "webpack --config webpack.config.cjs --env target=firefox",
     "build:chromium": "webpack --config webpack.config.cjs --env target=chromium",
-    "build-for-amo": "npm run build:firefox",
+    "build-for-amo": "npm run build && npm run verify-build",
+    "package:source": "node tools/build-source-archive.mjs",
     "typecheck": "tsc --project tsconfig.json",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-include=src/*.js --test-coverage-lines=95 --test-coverage-functions=95 --test-coverage-branches=80",
     "verify-build": "node tools/verify-build.mjs",
     "smoke-build": "node tools/smoke-build.mjs",
-    "check": "npm run typecheck && npm run test:coverage && npm run build && npm run verify-build && npm run smoke-build"
+    "check": "npm run typecheck && npm run test:coverage && npm run build-for-amo && npm run smoke-build"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
     "webpack": "^5.109.2",
     "webpack-cli": "^7.2.2",
     "yauzl": "^3.4.0",
+    "yazl": "^3.3.1",
     "zip-webpack-plugin": "^4.0.3"
   }
 }
