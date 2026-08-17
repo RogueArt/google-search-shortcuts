@@ -5,7 +5,15 @@ import yauzl from 'yauzl'
 
 const FIREFOX_ID = '{10bdbdc0-e1da-4471-96a3-8f4dd6ed38a3}'
 const TARGETS = ['firefox', 'chromium']
+const ICONS = {
+  16: 'icons/icon-16.png',
+  32: 'icons/icon-32.png',
+  48: 'icons/icon-48.png',
+  128: 'icons/icon-128.png',
+}
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
+
+assert.equal(packageJson.license, 'MPL-2.0')
 
 function readZip(filename) {
   return new Promise((resolve, reject) => {
@@ -61,7 +69,37 @@ function readZip(filename) {
   })
 }
 
-const sharedAssets = ['content.css', 'popup.css', 'popup.html', 'popup.js', 'script.js']
+async function listFiles(directory, relativeDirectory = '') {
+  const entries = await readdir(
+    path.join(directory, relativeDirectory),
+    { withFileTypes: true },
+  )
+  const files = []
+
+  for (const entry of entries) {
+    const relativePath = relativeDirectory
+      ? `${relativeDirectory}/${entry.name}`
+      : entry.name
+
+    if (entry.isDirectory()) {
+      files.push(...await listFiles(directory, relativePath))
+    } else {
+      files.push(relativePath)
+    }
+  }
+
+  return files.sort()
+}
+
+const sharedAssets = [
+  'LICENSE',
+  'content.css',
+  ...Object.values(ICONS),
+  'popup.css',
+  'popup.html',
+  'popup.js',
+  'script.js',
+]
 const sharedContents = new Map()
 
 for (const target of TARGETS) {
@@ -73,6 +111,8 @@ for (const target of TARGETS) {
 
   assert.equal(manifest.version, packageJson.version)
   assert.equal(action.default_popup, 'popup.html')
+  assert.deepEqual(manifest.icons, ICONS)
+  assert.deepEqual(action.default_icon, ICONS)
   assert.deepEqual(manifest.permissions, ['storage'])
   assert.equal('host_permissions' in manifest, false)
   assert.equal(manifest.content_scripts[0].run_at, 'document_end')
@@ -95,13 +135,15 @@ for (const target of TARGETS) {
   const requiredFiles = [
     'manifest.json',
     ...sharedAssets,
+    ...Object.values(manifest.icons),
+    ...Object.values(action.default_icon),
     ...manifest.content_scripts.flatMap(contentScript => [
       ...contentScript.js,
       ...(contentScript.css || []),
     ]),
   ]
   const expectedFiles = [...new Set(requiredFiles)].sort()
-  const actualFiles = (await readdir(outputDirectory)).sort()
+  const actualFiles = await listFiles(outputDirectory)
   assert.deepEqual(actualFiles, expectedFiles)
 
   const builtFiles = new Map()

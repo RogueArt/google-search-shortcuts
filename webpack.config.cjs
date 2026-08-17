@@ -14,7 +14,10 @@ function createManifest(target) {
       ...common,
       version: packageJson.version,
       manifest_version: 2,
-      browser_action: { default_popup: defaultPopup },
+      browser_action: {
+        default_icon: common.icons,
+        default_popup: defaultPopup,
+      },
       browser_specific_settings: {
         gecko: {
           id: '{10bdbdc0-e1da-4471-96a3-8f4dd6ed38a3}',
@@ -29,7 +32,10 @@ function createManifest(target) {
     version: packageJson.version,
     manifest_version: 3,
     minimum_chrome_version: '95',
-    action: { default_popup: defaultPopup },
+    action: {
+      default_icon: common.icons,
+      default_popup: defaultPopup,
+    },
   }
 }
 
@@ -59,6 +65,8 @@ function createConfig(target) {
           { from: './src/content.css', to: 'content.css' },
           { from: './src/popup.html', to: 'popup.html' },
           { from: './src/popup.css', to: 'popup.css' },
+          { from: './src/icons', to: 'icons' },
+          { from: './LICENSE', to: 'LICENSE', toType: 'file' },
         ],
       }),
       new ZipPlugin({

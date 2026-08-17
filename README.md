@@ -9,6 +9,7 @@
   <a href="https://chromewebstore.google.com/detail/google-search-shortcuts/CHROME_EXTENSION_ID"><img alt="Chrome publishing soon" src="https://img.shields.io/badge/Chrome-Publishing_soon-4285F4?logo=googlechrome&amp;logoColor=white"></a>
   <a href="https://microsoftedge.microsoft.com/addons/detail/google-search-shortcuts/EDGE_EXTENSION_ID"><img alt="Edge publishing soon" src="https://img.shields.io/badge/Edge-Publishing_soon-0078D7?logo=microsoftedge&amp;logoColor=white"></a>
   <a href="./package.json"><img alt="Next release 2.0.0" src="https://img.shields.io/badge/next_release-2.0.0-0969DA"></a>
+  <a href="./LICENSE"><img alt="License: MPL-2.0" src="https://img.shields.io/badge/license-MPL--2.0-8A2BE2"></a>
 </p>
 
 </div>
@@ -238,6 +239,12 @@ npm run check
 
 [Open an issue](https://github.com/rajpiskala/google-search-shortcuts/issues/new)
 or browse the [existing issues](https://github.com/rajpiskala/google-search-shortcuts/issues).
+
+## License
+
+Google Search Shortcuts is available under the
+[Mozilla Public License 2.0](LICENSE). The complete license is also included in
+each Firefox, Chrome, and Edge build package.
 
 ---
 
