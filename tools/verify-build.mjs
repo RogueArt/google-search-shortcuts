@@ -5,7 +5,22 @@ import yauzl from 'yauzl'
 
 const FIREFOX_ID = '{10bdbdc0-e1da-4471-96a3-8f4dd6ed38a3}'
 const TARGETS = ['firefox', 'chromium']
+const ICONS = {
+  16: 'icons/icon-16.png',
+  32: 'icons/icon-32.png',
+  48: 'icons/icon-48.png',
+  128: 'icons/icon-128.png',
+}
 const packageJson = JSON.parse(await readFile('package.json', 'utf8'))
+const sourceFiles = JSON.parse(
+  await readFile('tools/source-files.json', 'utf8'),
+)
+
+assert.equal(packageJson.license, 'MPL-2.0')
+assert.equal(
+  packageJson.scripts['package:source'],
+  'node tools/build-source-archive.mjs',
+)
 
 function readZip(filename) {
   return new Promise((resolve, reject) => {
@@ -25,6 +40,7 @@ function readZip(filename) {
           const normalized = path.posix.normalize(entry.fileName)
           if (
             path.posix.isAbsolute(entry.fileName)
+            || entry.fileName.includes('\\')
             || normalized === '..'
             || normalized.startsWith('../')
           ) {
@@ -61,7 +77,37 @@ function readZip(filename) {
   })
 }
 
-const sharedAssets = ['content.css', 'popup.css', 'popup.html', 'popup.js', 'script.js']
+async function listFiles(directory, relativeDirectory = '') {
+  const entries = await readdir(
+    path.join(directory, relativeDirectory),
+    { withFileTypes: true },
+  )
+  const files = []
+
+  for (const entry of entries) {
+    const relativePath = relativeDirectory
+      ? `${relativeDirectory}/${entry.name}`
+      : entry.name
+
+    if (entry.isDirectory()) {
+      files.push(...await listFiles(directory, relativePath))
+    } else {
+      files.push(relativePath)
+    }
+  }
+
+  return files.sort()
+}
+
+const sharedAssets = [
+  'LICENSE',
+  'content.css',
+  ...Object.values(ICONS),
+  'popup.css',
+  'popup.html',
+  'popup.js',
+  'script.js',
+]
 const sharedContents = new Map()
 
 for (const target of TARGETS) {
@@ -73,6 +119,8 @@ for (const target of TARGETS) {
 
   assert.equal(manifest.version, packageJson.version)
   assert.equal(action.default_popup, 'popup.html')
+  assert.deepEqual(manifest.icons, ICONS)
+  assert.deepEqual(action.default_icon, ICONS)
   assert.deepEqual(manifest.permissions, ['storage'])
   assert.equal('host_permissions' in manifest, false)
   assert.equal(manifest.content_scripts[0].run_at, 'document_end')
@@ -95,13 +143,15 @@ for (const target of TARGETS) {
   const requiredFiles = [
     'manifest.json',
     ...sharedAssets,
+    ...Object.values(manifest.icons),
+    ...Object.values(action.default_icon),
     ...manifest.content_scripts.flatMap(contentScript => [
       ...contentScript.js,
       ...(contentScript.css || []),
     ]),
   ]
   const expectedFiles = [...new Set(requiredFiles)].sort()
-  const actualFiles = (await readdir(outputDirectory)).sort()
+  const actualFiles = await listFiles(outputDirectory)
   assert.deepEqual(actualFiles, expectedFiles)
 
   const builtFiles = new Map()
@@ -131,4 +181,27 @@ for (const target of TARGETS) {
   }
 }
 
-console.log('Verified Firefox MV2 and Chromium MV3 packages, shared assets, manifests, and ZIP contents.')
+assert.equal(new Set(sourceFiles).size, sourceFiles.length)
+const expectedSourceFiles = [...sourceFiles].sort()
+const sourceArchivePath = `dist/packages/google-search-shortcuts-${packageJson.version}-source.zip`
+const archivedSourceFiles = await readZip(sourceArchivePath)
+
+assert.deepEqual([...archivedSourceFiles.keys()].sort(), expectedSourceFiles)
+
+for (const file of expectedSourceFiles) {
+  const repositoryFile = await readFile(file)
+  assert.equal(
+    archivedSourceFiles.get(file).equals(repositoryFile),
+    true,
+    `${file} must be unchanged in the source ZIP`,
+  )
+}
+
+const reviewerInstructions = archivedSourceFiles
+  .get('docs/amo-source-submission.md')
+  .toString('utf8')
+assert.match(reviewerInstructions, /npm ci/)
+assert.match(reviewerInstructions, /npm run build-for-amo/)
+assert.match(reviewerInstructions, /Node\.js 22\.13\.0 or newer/)
+
+console.log('Verified Firefox MV2, Chromium MV3, and AMO source packages, manifests, shared assets, and ZIP contents.')
