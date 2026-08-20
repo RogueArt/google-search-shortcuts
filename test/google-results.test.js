@@ -219,6 +219,61 @@ test('links outside rso and layout-hidden links are ignored', () => {
   assert.deepEqual(getAllTopLevelLinks(window.document), [])
 })
 
+test('Basic Variant results use the main root when rso is absent', () => {
+  const { window } = createDom(`
+    <a id="outside" href="/outside"><h3>Outside result root</h3></a>
+    <main id="main">
+      <nav><a id="navigation" href="/preferences">Preferences</a></nav>
+      <section>
+        <article>
+          <a id="basicA" href="/url?q=https%3A%2F%2Fexample.com%2FA">
+            <h3>Basic result A</h3>
+          </a>
+        </article>
+        <article>
+          <a id="basicB" href="/url?q=https%3A%2F%2Fexample.com%2FB">
+            <h3>Basic result B</h3>
+          </a>
+        </article>
+      </section>
+    </main>
+  `, { url: 'https://www.google.com/search?q=test&gbv=1' })
+  setAnchorRect(window.document, 'outside', { top: 20 })
+  setAnchorRect(window.document, 'basicA', { top: 100 })
+  setAnchorRect(window.document, 'basicB', { top: 300 })
+
+  assert.deepEqual(
+    getAllTopLevelLinks(window.document).map(link => link.id),
+    ['basicA', 'basicB'],
+  )
+  assert.deepEqual(
+    getAllLinkGroups(window.document).map(group => group.mainLink.id),
+    ['basicA', 'basicB'],
+  )
+})
+
+test('main is not treated as a result root outside Basic Variant mode', () => {
+  const { window } = createDom(`
+    <main id="main">
+      <a id="unrelated" href="/unrelated"><h3>Unrelated heading</h3></a>
+    </main>
+  `)
+  setAnchorRect(window.document, 'unrelated', { top: 100 })
+
+  assert.deepEqual(getAllTopLevelLinks(window.document), [])
+})
+
+test('Basic Variant redirect pages without a main root safely return no results', () => {
+  const { window } = createDom(`
+    <div id="yvlrue" style="display: none">
+      <a href="/search?q=test&amp;gbv=1&amp;emsg=SG_REL">Retry search</a>
+    </div>
+  `, { url: 'https://www.google.com/search?q=test&gbv=1' })
+
+  assert.deepEqual(getAllTopLevelLinks(window.document), [])
+  assert.deepEqual(getAllLinkGroups(window.document), [])
+})
+
 test('a child of a zero-sized overflow container is not actionable', () => {
   const { window } = createDom(`
     <main id="rso">

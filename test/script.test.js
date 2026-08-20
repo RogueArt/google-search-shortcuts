@@ -35,16 +35,23 @@ function createBrowserApi(stored = null, getError = null) {
   }
 }
 
-function createSearchPage() {
+function createSearchPage({ basicVariant = false } = {}) {
+  const resultsRootId = basicVariant ? 'main' : 'rso'
+  const url = basicVariant
+    ? 'https://www.google.com/search?q=test&gbv=1'
+    : 'https://www.google.com/search?q=test'
+  const resultHref = id => basicVariant
+    ? `/url?q=${encodeURIComponent(`https://example.com/${id}`)}`
+    : `https://example.com/${id}`
   const { window } = createDom(`
     <input id="search" />
     <div id="editor" contenteditable="true"></div>
-    <main id="rso">
-      <article><a id="A" href="https://example.com/A"><h3>A</h3></a></article>
-      <article><a id="B" href="https://example.com/B"><h3>B</h3></a></article>
-      <article><a id="C" href="https://example.com/C"><h3>C</h3></a></article>
+    <main id="${resultsRootId}">
+      <article><a id="A" href="${resultHref('A')}"><h3>A</h3></a></article>
+      <article><a id="B" href="${resultHref('B')}"><h3>B</h3></a></article>
+      <article><a id="C" href="${resultHref('C')}"><h3>C</h3></a></article>
     </main>
-  `)
+  `, { url })
   setRect(window.document.getElementById('A'), { top: 100 })
   setRect(window.document.getElementById('B'), { top: 300 })
   setRect(window.document.getElementById('C'), { top: 500 })
@@ -107,6 +114,23 @@ test('controller dispatches shortcuts, prevents defaults, and cleans up', async 
 
   cleanup()
   assert.equal(browserApi.listenerCount(), 0)
+})
+
+test('controller navigates Google Basic Variant results end to end', async () => {
+  const window = createSearchPage({ basicVariant: true })
+  const cleanup = await initializeExtension({
+    documentRef: window.document,
+    windowRef: window,
+    browserApi: createBrowserApi(),
+  })
+
+  assert.equal(window.document.activeElement.id, 'A')
+  assert.equal(dispatchKey(window, 'j').defaultPrevented, true)
+  assert.equal(window.document.activeElement.id, 'B')
+  assert.equal(dispatchKey(window, 'k').defaultPrevented, true)
+  assert.equal(window.document.activeElement.id, 'A')
+
+  cleanup()
 })
 
 test('input and contenteditable focus suppress navigation without preventing keys', async () => {

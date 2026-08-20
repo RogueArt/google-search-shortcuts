@@ -1,11 +1,11 @@
 # Testing and coverage
 
-The suite contains 57 source-level tests plus four built-bundle smoke scenarios.
+The suite contains 61 source-level tests plus four built-bundle smoke scenarios.
 `npm run test:coverage` enforces at least 95% line coverage, 95% function
 coverage, and 80% branch coverage across `src/*.js`.
-The current measured result is 97.80% lines, 84.29% branches, and 100% functions.
+The current measured result is 97.83% lines, 84.75% branches, and 100% functions.
 
-## What the 57 tests cover
+## What the 61 tests cover
 
 ### Browser API selection — 3 tests
 
@@ -13,7 +13,7 @@ The current measured result is 97.80% lines, 84.29% branches, and 100% functions
 - Fall back to Chromium's `chrome` namespace.
 - Reject absent or incomplete extension APIs instead of silently half-starting.
 
-### Google result discovery — 11 tests
+### Google result discovery — 14 tests
 
 - Visual top-to-bottom and left-to-right order rather than raw DOM order.
 - Stable row buckets and DOM-order tie breaking.
@@ -22,8 +22,10 @@ The current measured result is 97.80% lines, 84.29% branches, and 100% functions
 - Exclusion of clipped, hidden, transparent, `aria-hidden`, noisy, timestamp,
   answer-count, and `Read more` links.
 - Results below the viewport remain eligible.
-- Links outside `#rso`, links without layout, and children of collapsed
-  overflow containers are ignored.
+- Standard `#rso` and Basic Variant (`gbv=1`) `#main` result roots.
+- Links outside the selected result root, non-Basic `#main` content, links
+  without layout, and children of collapsed overflow containers are ignored.
+- Basic Variant redirect/error pages without a result root safely no-op.
 
 ### Navigation state machine — 12 tests
 
@@ -54,9 +56,10 @@ The current measured result is 97.80% lines, 84.29% branches, and 100% functions
 - Resetting and persisting defaults.
 - Storage read/write failure recovery while keeping the popup usable.
 
-### Content-script controller — 11 tests
+### Content-script controller — 12 tests
 
 - Shortcut dispatch, default prevention, listener registration, and cleanup.
+- End-to-end J/K traversal through a Basic Variant DOM fixture.
 - Suppression inside inputs and contenteditable controls.
 - Search-box focus and native Space behavior during initialization.
 - Default-shortcut availability while saved settings are still loading.

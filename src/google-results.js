@@ -285,8 +285,24 @@ function isValidSubLink(link, mainLink, scope, scan) {
   return hasClasslessSpan(link)
 }
 
+function isBasicVariant(root) {
+  const documentRef = root.nodeType === 9 ? root : root.ownerDocument
+  const search = documentRef && documentRef.location
+    ? documentRef.location.search
+    : ''
+
+  return new URLSearchParams(search).get('gbv') === '1'
+}
+
+function getResultsRoot(root) {
+  const standardRoot = root.querySelector('#rso')
+  if (standardRoot) return standardRoot
+
+  return isBasicVariant(root) ? root.querySelector('#main') : null
+}
+
 export function getAllTopLevelLinks(root = document) {
-  const resultsRoot = root.querySelector('#rso')
+  const resultsRoot = getResultsRoot(root)
   if (!resultsRoot) return []
 
   const anchors = [...resultsRoot.querySelectorAll('a')]
@@ -299,7 +315,7 @@ export function getAllTopLevelLinks(root = document) {
 }
 
 export function getAllLinkGroups(root = document) {
-  const resultsRoot = root.querySelector('#rso')
+  const resultsRoot = getResultsRoot(root)
   if (!resultsRoot) return []
 
   const anchors = [...resultsRoot.querySelectorAll('a')]

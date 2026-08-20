@@ -47,7 +47,7 @@ dist/packages/google-search-shortcuts-firefox.zip
 The accompanying reviewer source archive is produced at:
 
 ```text
-dist/packages/google-search-shortcuts-2.0.0-source.zip
+dist/packages/google-search-shortcuts-2.1.0-source.zip
 ```
 
 The Chromium package is also generated from the same source at

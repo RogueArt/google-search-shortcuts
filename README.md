@@ -10,7 +10,7 @@
   <a href="https://addons.mozilla.org/firefox/addon/google-search-shortcuts/"><img alt="Install for Firefox" src="https://img.shields.io/badge/Firefox-Install-FF7139?logo=firefoxbrowser&amp;logoColor=white"></a>
   <a href="https://chromewebstore.google.com/detail/google-search-shortcuts/CHROME_EXTENSION_ID"><img alt="Chrome publishing soon" src="https://img.shields.io/badge/Chrome-Publishing_soon-4285F4?logo=googlechrome&amp;logoColor=white"></a>
   <a href="https://microsoftedge.microsoft.com/addons/detail/google-search-shortcuts/EDGE_EXTENSION_ID"><img alt="Edge publishing soon" src="https://img.shields.io/badge/Edge-Publishing_soon-0078D7?logo=microsoftedge&amp;logoColor=white"></a>
-  <a href="./package.json"><img alt="Next release 2.0.0" src="https://img.shields.io/badge/next_release-2.0.0-0969DA"></a>
+  <a href="./package.json"><img alt="Next release 2.1.0" src="https://img.shields.io/badge/next_release-2.1.0-0969DA"></a>
   <a href="./LICENSE"><img alt="License: MPL-2.0" src="https://img.shields.io/badge/license-MPL--2.0-8A2BE2"></a>
 </p>
 
@@ -116,8 +116,8 @@ Firefox remains on Manifest V2 because Mozilla continues to support it and this
 extension does not need a background worker, request interception, or another
 feature that would benefit from a Firefox Manifest V3 conversion.
 
-Current scope is limited to Search pages on `google.com`. Other Google country
-domains are not yet included.
+Current scope includes standard and Basic Variant (`gbv=1`) Search pages on
+`google.com`. Other Google country domains are not yet included.
 
 ## Development
 
@@ -159,7 +159,7 @@ both production builds, package verification, and built-bundle smoke tests.
 | --- | --- | --- |
 | Firefox | `dist/firefox/` | `dist/packages/google-search-shortcuts-firefox.zip` |
 | Chrome / Edge | `dist/chromium/` | `dist/packages/google-search-shortcuts-chromium.zip` |
-| AMO reviewer source | — | `dist/packages/google-search-shortcuts-2.0.0-source.zip` |
+| AMO reviewer source | — | `dist/packages/google-search-shortcuts-2.1.0-source.zip` |
 
 The shared JavaScript, CSS, and HTML are verified byte-for-byte across the two
 browser packages. Only browser-specific manifest metadata differs.
@@ -174,7 +174,7 @@ npm run build-for-amo
 ```
 
 Upload `google-search-shortcuts-firefox.zip` as the add-on and
-`google-search-shortcuts-2.0.0-source.zip` as its source code. Both are written
+`google-search-shortcuts-2.1.0-source.zip` as its source code. Both are written
 to `dist/packages/`. The source ZIP contains only original project files from
 an explicit allowlist—no `node_modules`, `dist`, bundled JavaScript, or other
 machine-generated source—and the verifier checks every archived byte.
