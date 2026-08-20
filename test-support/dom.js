@@ -1,12 +1,15 @@
 import { JSDOM } from 'jsdom'
 
-export function createDom(html = '<main id="rso"></main>') {
+export function createDom(
+  html = '<main id="rso"></main>',
+  { url = 'https://www.google.com/search?q=test' } = {},
+) {
   const source = /<!doctype html>/i.test(html)
     ? html
     : `<!doctype html><html><body>${html}</body></html>`
 
   return new JSDOM(source, {
-    url: 'https://www.google.com/search?q=test',
+    url,
     pretendToBeVisual: true,
   })
 }
